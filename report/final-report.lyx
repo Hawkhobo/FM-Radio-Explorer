@@ -1092,6 +1092,12 @@ to decompose the JPEG into pixels and the bilinear scaler to fit them onto the c
 IR Receiver Interrupts and Remote Input
 \end_layout
 
+\begin_layout Standard
+This is virtually identical to the code from Lab 3,
+ with the exception of having a larger set of inputs and not utilizing multi-tap.
+ Please refer to our Lab 3 report for further details.
+\end_layout
+
 \begin_layout Subsection
 
 \family typewriter
