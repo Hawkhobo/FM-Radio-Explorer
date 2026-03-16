@@ -10,6 +10,7 @@
 \usepackage[caption=false,font=footnotesize]{subfig}
 
 \markboth{EEC 172 Final Report, WQ2026}{EEC 172 Final Report, WQ2026}
+\raggedbottom
 
 % color for code
 \usepackage{xcolor}
@@ -154,7 +155,7 @@ The FM Radio Explorer has changed due to time & hardware constraints from it's i
  but it still offers an exploratory music listening experience.
  In its current stage,
  it is a prototype with real capability to become a production-value system.
- LastFM's public-facing API is still used to query metadata for a particular song,
+ Last.fm's public-facing API is still used to query metadata for a particular song,
  and the radio module is capable of tuning into FM radio signals and performing playback.
  Unfortunately,
  working with the RDA5870M radio module model proved more difficult than we anticipated,
@@ -166,14 +167,14 @@ The FM Radio Explorer has changed due to time & hardware constraints from it's i
 
 \begin_layout Standard
 The current prototype is as follows:
- LastFM offers a wide variety of metadata and points of musical exploration,
+ Last.fm offers a wide variety of metadata and points of musical exploration,
  a subset of which is displayed for a song of our choice,
  by querying the API endpoints with the track and artist name.
  The S10-S3 Univeral Remote and IR Receiver is configured for numerical & punctuation input,
  and writes to the radio module and plays a selected FM broadband (for example,
  90.3 would correlate to 90.3 FM).
  The same remote will be used to switch between different OLED Display views,
- each of which displays different output from the LastFM API (to be discussed in Section 
+ each of which displays different output from the Last.fm API (to be discussed in Section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sec:Design"
@@ -568,7 +569,7 @@ The DSP also manages an analog path to the audio output.
 \end_layout
 
 \begin_layout Standard
-The hardcoded demo code is inputted to the LastFM API.
+The hardcoded demo code is inputted to the Last.fm API.
  HTTP GET responses fetch relevant song & artist information from the API endpoints.
  Each song entry has specially prepared synced lyrics to demonstrate our prototype.
  A final production-quality system would likely spend the fee to use the Musixmatch API,
@@ -594,7 +595,7 @@ tuple "list"
 .
  With these specifications,
  we can control the views on the OLED display,
- which will be populated by GET responses from the LastFM API.
+ which will be populated by GET responses from the Last.fm API.
 \end_layout
 
 \begin_layout Section
@@ -608,6 +609,13 @@ name "sec:Implementation"
 
 \end_layout
 
+\begin_layout Standard
+Implementation details are explained at a high-level,
+ and forgoes specific C programming language details.
+ It does delve into driver code details where applicable,
+ since this informs our design.
+\end_layout
+
 \begin_layout Subsection
 OLED Display API 
 \begin_inset CommandInset label
@@ -619,12 +627,318 @@ name "subsec:OLED-Display-API"
 
 \end_layout
 
+\begin_layout Standard
+The OLED UI module (
+\family typewriter
+oled_ui.c
+\family default
+ / 
+\family typewriter
+oled_ui.h
+\family default
+) is the sole owner of the 128x128 SSD1351 OLED display surface.
+ Decisions for what is drawn,
+ where,
+ and in what color all live here.
+ The rest of the firmware (the radio driver,
+ the Last.fm client,
+ the IR remote handler,
+ and main.c itself) communicates with this module through it's API.
+ Only the OLED UI issues drawing commands to the Adafruit GFX layer directly.
+\end_layout
+
+\begin_layout Subsubsection
+The View System
+\end_layout
+
+\begin_layout Standard
+The module exposes seven named views,
+ each corresponding to a distinct data category fetched during operation.
+ Each view has a three-character banner abbreviation and its own internal data store.
+ Only one view is active at a time.
+ The active view value is held in a single module-level variable (an enum).
+ Navigation calls cycle this variable and reset the associated scroll offset to zero,
+ but do not repaint the screen.
+ The render call that follows reads the current view ID and calls the appropriate internal draw function.
+ This means that switching to the next view (input-driven) is a 2-API call process.
+ Each view has an associated API endpoint to render this view,
+ which are doucmented in 
+\family typewriter
+oled_ui.h
+\family default
+.
+ 
+\end_layout
+
+\begin_layout Standard
+There is a separation between data updates and rendering.
+ Every update function writes new values into it's data store.
+ None of them touch the OLED hardware.
+ The single oled_ui_render() call is the only place where data is consumed and pixels are produced (OLED hardware is called here).
+ We leverage this to call multiple update functions in sequence before committing a single visual frame to the display.
+\end_layout
+
+\begin_layout Subsubsection
+Text Engine
+\end_layout
+
+\begin_layout Standard
+All drawing is built on top of the Adafruit GFX methods (fillRect,
+ drawPixel,
+ drawChar,
+ drawFastHLine,
+ drawFastVLine).
+ The Adafruit 5x7 bitmap font at size 1 IS USED,
+ giving each character a 6x8 pixel region (5 pixels wide plus a 1-pixel gap) and each text row a 9-pixel height (8 pixels tall plus a 1-pixel gap).
+ Text views (biography,
+ lyrics,
+ etc) are rendered in the folllowing way:
+ on a render call,
+ the engine first counts the total number of wrapped lines the stored text produces.
+ It then renders only the subset of lines that fall within the visible window defined by the current scroll offset.
+ Wrapping respects hard newlines in the source string and falls back to a soft break at the last space before the column limit if a word would overflow the line.
+ The scroll position is clamped during this pass so that attempting to scroll down the last line of content is always safe.
+ When a view's content extends above or below the display window,
+ a small magenta indicator dot is painted at the top-right or bottom-right corner of the screen to indicate that more content exists in that direction.
+\end_layout
+
+\begin_layout Subsubsection
+Album Cover Rendering
+\end_layout
+
+\begin_layout Standard
+The album cover requires two modules working in sequence.
+ The Last.fm client (
+\family typewriter
+Last.fm.c
+\family default
+) handles the network side:
+ it downloads the JPEG from the Last.f CDN,
+ decodes the HTTP response to extract the raw image bytes,
+ and passes a pointer to those bytes along with their length to 
+\family typewriter
+oled_ui_render_album_jpeg()
+\family default
+.
+ From that point,
+ everything is the OLED UI module's responsibility.
+\end_layout
+
+\begin_layout Standard
+The raw bytes are handed to 
+\family typewriter
+stb_image
+\family default
+,
+ which decodes them into a flat array of 24-bit RGB pixels.
+ Then,
+ it determines computes scale parameters that fit the decoded image into the content area while preserving the original aspect ratio.
+ If the image is wider than it is tall,
+ the width is constrained to 128 pixels and the height scales proportionally;
+ if it is taller,
+ the height is constrained to 116 pixels.
+ Any remaining border is left black.
+ The 
+\family typewriter
+stb_image
+\family default
+ decoding is the most complicated pipeline anywhere in our entire codebase,
+ and consists of approximately 8,000 lines of code which preprocesses the raw JPEG for OLED display use.
+ This library is taken entirely from 
+\begin_inset CommandInset href
+LatexCommand href
+name "Sean T. Barrett's public-domain C/C++ libraries"
+target "https://github.com/nothings/stb"
+literal "false"
+
+\end_inset
+
+.
+ Specifically 
+\family typewriter
+stb_image.h
+\family default
+.
+ We prepared a source file to use the main header file,
+ and that is virtually all the integration that was needed.
+\end_layout
+
+\begin_layout Standard
+The scaled image is written to the OLED using bilinear interpolation with a tunable sharpness.
+ This helps to balance blurriness at small display sizes without introducing the pixel-grid artifacts of pure nearest-neighbour scaling (a pretty ugly grid-like pattern).
+ All of the pixels are passed through this filter before being drawn to the OLED.
+\end_layout
+
+\begin_layout Standard
+Because the CC3200 has limited RAM,
+ 
+\family typewriter
+stb_image
+\family default
+ is configured to use a static pool allocator rather than the heap.
+ The pool is reset before every decode call and again after the draw has completed,
+ keeping the allocation self-contained to the given cycle.
+\end_layout
+
+\begin_layout Subsubsection
+Color Scheme
+\end_layout
+
+\begin_layout Standard
+All colour values are in a single block of named aliases near the top of 
+\family typewriter
+oled_ui.c
+\family default
+.
+ Changing the visual theme requires editing only this block;
+ there are no other color literals in the code.
+\end_layout
+
 \begin_layout Subsection
-SimpleLink & LastFM API
+SimpleLink & Last.fm API
 \end_layout
 
 \begin_layout Subsection
 IR Receiver Interrupts and Remote Input
+\end_layout
+
+\begin_layout Subsection
+
+\family typewriter
+main()
+\family default
+ Event Loop
+\end_layout
+
+\begin_layout Subsubsection
+Initialization Sequence:
+\end_layout
+
+\begin_layout Standard
+First,
+ peripheral devices are brought up:
+ board vectors,
+ pin multiplexing,
+ Wi-Fi,
+ SPI,
+ and UART.
+ The Adafruit SSD1351 driver is initialized,
+ then the OLED UI module,
+ and lastly the TEA5767 radio module (default tuning at 90.3 MHz,
+ and the OLED UI is updated accordingly).
+ The IR receiver is then initialized,
+ and the Last.fm API client is fed it's API key.
+ 
+\family typewriter
+query_lastfm()
+\family default
+ get called to fetch metadata for the current track on 90.3 and populdate all data stores to reflect this current track.
+ Then it's all rendered to the OLED!
+\end_layout
+
+\begin_layout Subsubsection
+Query Last.fm helper
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+query_lastfm() 
+\family default
+function is the bridge between the Last.fm network client and the OLED UI module.
+ It calls the endpoint responsible for executing the Last.fm API calls and internally calls all the necessary 
+\family typewriter
+oled_ui*
+\family default
+ calls to update each view.
+ It also calls the data for the synced lyrics.
+\end_layout
+
+\begin_layout Subsubsection
+Tune and Update Helper
+\end_layout
+
+\begin_layout Standard
+When the user enters a new frequency,
+ 
+\family typewriter
+tune_and_update()
+\family default
+is called.
+ It first validates the frequency against the FM band limits.
+ If the frequency is out of range,
+ it provides visual error feedback,
+ then restores the display to its previous state.
+ If the frequency is valid,
+ the TEA5767 driver is instructed to retune,
+ the signal strength is read back,
+ 
+\family typewriter
+query_lastfm() 
+\family default
+is called to refresh all metadata views,
+ and the Radio view is updated and rendered with the new station label and signal level.
+\end_layout
+
+\begin_layout Subsubsection
+IR Remote Event Loop
+\end_layout
+
+\begin_layout Standard
+This is most of the code in 
+\family typewriter
+main.
+\family default
+c;
+ 
+\family typewriter
+main()
+\family default
+ enters an infinite polling loop.
+ On each iteration it checks whether the IR receiver has completed decoding a button press.
+ If so,
+ the raw RC5 code is decoded to a logical command and sent to a switch statement.
+ For digits 0-9 and the dot button,
+ each digit is appended to a frequency entry buffer.
+ The station field is immediately updated with a live preview string prefixed by > ,
+ and the Radio view is rendered to show the in-progress entry.
+ For SELECT (Enter),
+ if a frequency entry is in progress,
+ the buffer is parsed and 
+\family typewriter
+tune_and_update()
+\family default
+ is called with the result.
+ If the buffer cannot be parsed (it contains only a decimal point),
+ oled_ui_flash_error_banner() is called and the display reverts to the last valid state.
+ If no entry is in progress,
+ SELECT simply forces the Radio view.
+\end_layout
+
+\begin_layout Standard
+• LEFT / RIGHT:
+ Calls oled_ui_navigate_left() or oled_ui_navigate_right() followed by oled_ui_render().
+ If the newly active view is the Album Cover view and artwork has already been fetched,
+ LastFM_RenderAlbumCover() is called immediately to paint the JPEG.
+\end_layout
+
+\begin_layout Standard
+• UP / DOWN:
+ Calls oled_ui_scroll_up() or oled_ui_scroll_down() followed by oled_ui_render().
+\end_layout
+
+\begin_layout Standard
+• MUTE:
+ Toggles the mute state on the TEA5767 driver.
+ No OLED update is triggered.
+\end_layout
+
+\begin_layout Standard
+• LAST (Delete):
+ If a frequency entry is active,
+ it removes the last digit from the buffer and updates the preview.
+ If no entry is active,
+ it reactivates the previously tuned station by calling tune_and_update(g_last_freq).
 \end_layout
 
 \begin_layout Subsection
@@ -678,13 +992,13 @@ Bill of Materials
  10$):
  Estimated at 10$,
  this was one of our headsets which we used.
- We are not certain of specifics.
+ It is a typical earphone which could be bought practically anywhere.
 \end_layout
 
 \begin_layout Enumerate
 DSP Radio Module (1x,
  $16.99):
- using a Create Idea RDA5807M FM Stereo Receiver available on Amazon.
+ using a TEA5767 FM Stereo Radio Module available on Amazon.
 \end_layout
 
 \begin_layout Enumerate
@@ -715,10 +1029,10 @@ Adafruit SSD1351 OLED Display (1x,
 
 \begin_layout Standard
 Total costs come out to 
-\bar under
-$
-\bar default
-xx.
+\uuline on
+$26.99
+\uuline default
+.
  
 \end_layout
 
