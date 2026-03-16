@@ -12,6 +12,23 @@ toc: true
 toc_sticky: true
 ---
 
+<style>
+  details {
+    margin-bottom: 1rem;
+    border: 1px solid #333;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+  }
+  summary {
+    outline: none;
+  }
+  details[open] summary {
+    border-bottom: 1px solid #444;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+</style>
+
 # FM Radio Explorer
 **Developed by: Jacob Feenstra & Chun-Ho Chen**
 
@@ -20,6 +37,14 @@ toc_sticky: true
 The FM Radio Explorer is a hardware-software prototype that offers an exploratory music listening experience by bridging traditional FM signals with modern web metadata.
 
 ---
+<details>
+  <summary style="font-size: 1.5em; font-weight: bold; cursor: pointer;">
+   Description 
+  </summary>
+The FM Radio Explorer has changed due to time & hardware constraints from it's initial proposal, but it still offers an exploratory music listening experience. In its current stage, it is a prototype with real capability to become a production-value system. Last.fm's public-facing API is still used to query metadata for a particular song, and the radio module is capable of tuning into FM radio signals and performing playback. Unfortunately, working with the RDA5870M radio module model proved more difficult than we anticipated, and we were not able to successfully solder it to the rest of the system. The replacement radio module we opted for does not support the Radio Data System protocol (RDS), which is crucial for being able to display information for the currently playing song. 
+
+The current prototype is as follows: Last.fm offers a wide variety of metadata and points of musical exploration, a subset of which is displayed for a song of our choice, by querying the API endpoints with the track and artist name. The S10-S3 Univeral Remote and IR Receiver is configured for numerical & punctuation input, and writes to the radio module and plays a selected FM broadband (for example, 90.3 would correlate to 90.3 FM). The same remote will be used to switch between different OLED Display views, each of which displays different output from the Last.fm API (to be discussed in Section [sec:Design]). An antenna boosts signal gain, and a cheap 3.5 mm auxiliary headset can plug directly into the headphone jack of the radio module. The API developed for the OLED UI, paired with the IR Receiver code, enables the user to switch between different FM radios seamlessly. Note all of this is orchestrated with our Texas Instrument's CC3200 LaunchPad.
+</details>
 
 ## System Overview
 The current prototype leverages the **TI CC3200 Launchpad** and an **Arduino Nano** to coordinate between physical radio signals and cloud-based metadata.
