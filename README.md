@@ -1,12 +1,13 @@
 ---
 layout: single
 title: "FM Radio Explorer"
+permalink: /
 author_profile: true
 header:
   overlay_color: "#000"
   overlay_filter: "0.5"
   overlay_image: /assets/images/header-radio.jpg # Add a header image if you have one!
-excerpt: "An embedded systems prototype integrating the TI CC3200, Last.fm API, and FM Stereo synthesis."
+excerpt: "An embedded systems prototype integrating the TI CC3200, Last.fm API, and an FM Stereo Radio Module."
 toc: true
 toc_sticky: true
 ---
