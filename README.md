@@ -150,7 +150,12 @@ We had many challenges with our original radio module, so we had to emergency pu
 
 While there were many challenges, we focus on the most prominent ones, which easily took up 90%+ of our time in attempting to solve (successfully or unsuccessully)
 
-### JPEG Decompression Library and Image Display
+### JPEG We had a very difficult time getting the JPEG image to work;
+
+it was expected this would be the most complicated component of the entire project,
+ and indeed it was. Issues mainly stemmed from the fact that Last.fm's fastly CDN for album covers only server progressive JPEGs,
+ and not baseline JPEGs.
+ This proved difficult,since most CC3200-compatible JPEG decompression/decoding libraries only support baseline. Luckily,there was stb_image, but we had to work through two other libraries (TJpegDec and JPEGDEC , refactoring the driver code of one entirely!) before we settled on this final library. After memory pooling issues (during this project, we had RAM issues with the microcontroller around 50 or so times), we got the image to display!
 
 ### Synced Lyrics
 
