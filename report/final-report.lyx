@@ -901,7 +901,7 @@ main()
  For digits 0-9 and the dot button,
  each digit is appended to a frequency entry buffer.
  The station field is immediately updated with a live preview string prefixed by > ,
- and the Radio view is rendered to show the in-progress entry.
+ and the Radio view is rendered to show the progress.
  For SELECT (Enter),
  if a frequency entry is in progress,
  the buffer is parsed and 
@@ -910,35 +910,48 @@ tune_and_update()
 \family default
  is called with the result.
  If the buffer cannot be parsed (it contains only a decimal point),
- oled_ui_flash_error_banner() is called and the display reverts to the last valid state.
+ our error module is called and the display reverts to the last valid state.
  If no entry is in progress,
  SELECT simply forces the Radio view.
-\end_layout
-
-\begin_layout Standard
-• LEFT / RIGHT:
- Calls oled_ui_navigate_left() or oled_ui_navigate_right() followed by oled_ui_render().
+ LEFT / RIGHT calls 
+\family typewriter
+oled_ui_navigate_left()
+\family default
+ or 
+\family typewriter
+oled_ui_navigate_right()
+\family default
+ followed by 
+\family typewriter
+oled_ui_render()
+\family default
+.
  If the newly active view is the Album Cover view and artwork has already been fetched,
- LastFM_RenderAlbumCover() is called immediately to paint the JPEG.
-\end_layout
-
-\begin_layout Standard
-• UP / DOWN:
- Calls oled_ui_scroll_up() or oled_ui_scroll_down() followed by oled_ui_render().
-\end_layout
-
-\begin_layout Standard
-• MUTE:
- Toggles the mute state on the TEA5767 driver.
+ 
+\family typewriter
+LastFM_RenderAlbumCover()
+\family default
+ is called immediately to display the JPEG.
+ UP / DOWN calls 
+\family typewriter
+oled_ui_scroll_up()
+\family default
+ or 
+\family typewriter
+oled_ui_scroll_down()
+\family default
+ followed by 
+\family typewriter
+oled_ui_render()
+\family default
+.
+ MUTE toggles the mute state on the TEA5767 driver.
  No OLED update is triggered.
-\end_layout
-
-\begin_layout Standard
-• LAST (Delete):
- If a frequency entry is active,
+ Note this is stale code and didn't make it to our prototype,
+ but it does work with the TEA5767 driver code.
+ Lastly for LAST (Delete),
+ if a frequency entry is active,
  it removes the last digit from the buffer and updates the preview.
- If no entry is active,
- it reactivates the previously tuned station by calling tune_and_update(g_last_freq).
 \end_layout
 
 \begin_layout Subsection
