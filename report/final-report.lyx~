@@ -622,8 +622,7 @@ We had many challenges with our original radio module,
  so we decided to have 2 separate systems,
  where one was to communicate with the Screen + IR Receiver,
  and the other was to communicate to the Arduino using UART.
- Even thought they could not happen at the same time with out current model,
- they would reasonably be able to happen with the right FM module.
+ 
 \end_layout
 
 \begin_layout Section
@@ -687,7 +686,7 @@ Since it came in a module package that was essentially plug and play,
 
 \begin_layout Itemize
 Assumed pull-up resistors in the launchpad were inadequate,
- tried to connect to the chip 3.3V and 5V
+ tried to implement the chip with 3.3V and 5V
 \end_layout
 
 \begin_deeper
@@ -705,7 +704,7 @@ We realized that since it was an entire module rather than just a single chip re
  The pull up resistors that were part of the modules were forcing the signals to that specification (~3.5V-4V),
  which was above the needed <~3.3 required to communicate with the launchpad,
  and nothing we additionally implement was going to fix that issue.
- This forced us into the design change listed above.
+ 
 \end_layout
 
 \begin_layout Section
@@ -717,10 +716,9 @@ RDS-supported Radio Module
 \end_layout
 
 \begin_layout Standard
-With our current setup our FM Module does not have the capabilities to read off metadata coming from the FM signals coming in.
+With our current setup our Module does not have the capabilities to read off metadata coming from the FM signals coming in.
  If we had however,
- it would have a simple addition to add a couple lines of code to read that source data and connect it directly to the Lastfm API.
- 
+ it would have a simple addition to 
 \end_layout
 
 \begin_layout Subsection
@@ -732,7 +730,6 @@ If we were allowed to use a similar radio chip to the one originally envisioned,
  we had the parts to add an amplifier chip to it manually.
  From that point onward,
  we would have been able to adjust the volume by connecting a potentiometer to its output.
- 
 \end_layout
 
 \begin_layout Subsection
