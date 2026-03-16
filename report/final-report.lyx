@@ -735,10 +735,6 @@ Failed RRD-102 Modules
 
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsubsection*
 TEA5767 FM Module
 \end_layout
@@ -776,10 +772,6 @@ We realized that since it was an entire module rather than just a single chip re
  which was above the needed <~3.3 required to communicate with the launchpad,
  and nothing we additionally implement was going to fix that issue.
  This forced us into the design change listed above.
-\end_layout
-
-\begin_layout Section
-Future Work
 \end_layout
 
 \begin_layout Section
