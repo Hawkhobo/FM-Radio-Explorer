@@ -537,7 +537,7 @@ Architectural Diagram
 \begin_layout Plain Layout
 \begin_inset Graphics
 	filename system_implementation.png
-	scale 30
+	scale 20
 
 \end_inset
 
@@ -1474,7 +1474,9 @@ FM Session History
 \begin_layout Standard
 If RAM concerns are not too heavy,
  it would conceivably be trivial to allow for session history of previously visited FM signals,
- and even past tracks that have been played (and allowing the ability to revisit their metadata
+ and even past tracks that have been played (and allowing the ability to revisit their metadata).
+ This was originally a stretch goal and would be a cool initiative for next steps,
+ once RDS is working.
 \end_layout
 
 \begin_layout Section
