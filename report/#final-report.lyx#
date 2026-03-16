@@ -9,6 +9,8 @@
 % for subfigures/subtables
 \usepackage[caption=false,font=footnotesize]{subfig}
 
+\markboth{EEC 172 Final Report, WQ2026}{EEC 172 Final Report, WQ2026}
+
 % color for code
 \usepackage{xcolor}
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -626,7 +628,24 @@ IR Receiver Interrupts and Remote Input
 \end_layout
 
 \begin_layout Subsection
-Headphones Jack
+Radio Module
+\end_layout
+
+\begin_layout Standard
+We had many challenges with our original radio module,
+ so we had to emergency purchase another module that had similar functionality.
+ The benefits of the new module is that it also came with the amplifier circuit and a headphone jack.
+ We learned over experimenting was that with the module constantly running at 5V,
+ there was no reasonable way for the I2C lines of the TI-Launchpad to communicate with the module.
+ We decided to implement a proof-of-concept instead.
+ There was already a setup designed using an Arduino and its 5V lines to command the module,
+ so we decided to have 2 separate systems,
+ where one was to communicate with the Screen + IR Receiver,
+ and the other was to communicate to the Arduino using UART.
+ Even thought they could not happen at the same time with out current model,
+ they would reasonably be able to happen with the right FM module.
+ There was an additional issue with the Arduino UART signals continuing to also be for 5V,
+ but we put a voltage divider so the TI-Launchpad could receive the correct signals.
 \end_layout
 
 \begin_layout Section
@@ -651,6 +670,117 @@ Synced Lyrics
 Radio Module Implementation
 \end_layout
 
+\begin_layout Subsubsection*
+RRD-102 with RDA5807M FM Module
+\end_layout
+
+\begin_layout Standard
+With the original radio module we received,
+ there were immediately many issues that hurt our ability to gain any progress.
+ While not looking into it too much originally,
+ we realized that the module is a Surface Mount Device (SMD).
+ We originally purchased 4,
+ and the first 2 were burned because I tried connecting them to a protoboard alongside their side holes.
+ This would cause the copper pads to heat up too much,
+ and they were of such cheap quality that the pads themselves would lift up,
+ causing the device to be unusable.
+ With the 3rd module,
+ we tried connecting to the back pads directly since that would be easier to solder,
+ but unfortunately the issues still persisted.
+ I lost the 4th one,
+ so we had to resort to purchasing a different module.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Failed RRD-102 Modules
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename IMG_8942.jpg
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename IMG_8943.jpg
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+TEA5767 FM Module
+\end_layout
+
+\begin_layout Standard
+Since it came in a module package that was essentially plug and play,
+ it was a lot easier in theory to implement than the previous module.
+ However,
+ we came across separate issues immediately.
+ When I would try to communicate with the module,
+ it would receive garbage date back.
+ We tested it using an Arduino I had,
+ and the system worked.
+ We then went down a rabbit hole where:
+\end_layout
+
+\begin_layout Itemize
+Assumed pull-up resistors in the launchpad were inadequate,
+ tried to connect to the chip 3.3V and 5V
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Tried adding high value (~5k) resistors
+\end_layout
+
+\begin_layout Itemize
+Tried adding low value (~330) resistors
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+We realized that since it was an entire module rather than just a single chip required to be running on 5V.
+ The pull up resistors that were part of the modules were forcing the signals to that specification (~3.5V-4V),
+ which was above the needed <~3.3 required to communicate with the launchpad,
+ and nothing we additionally implement was going to fix that issue.
+ This forced us into the design change listed above.
+\end_layout
+
+\begin_layout Section
+Future Work
+\end_layout
+
 \begin_layout Section
 Future Work
 \end_layout
@@ -659,8 +789,23 @@ Future Work
 RDS-supported Radio Module
 \end_layout
 
+\begin_layout Standard
+With our current setup our FM Module does not have the capabilities to read off metadata coming from the FM signals coming in.
+ If we had however,
+ it would have a simple addition to add a couple lines of code to read that source data and connect it directly to the Lastfm API.
+ 
+\end_layout
+
 \begin_layout Subsection
 Potentiometer-controlled Audio Playback
+\end_layout
+
+\begin_layout Standard
+If we were allowed to use a similar radio chip to the one originally envisioned,
+ we had the parts to add an amplifier chip to it manually.
+ From that point onward,
+ we would have been able to adjust the volume by connecting a potentiometer to its output.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -668,56 +813,433 @@ FM Session History
 \end_layout
 
 \begin_layout Section
-Bill of Materials
-\end_layout
-
-\begin_layout Enumerate
-3.5 mm aux earphones (1x,
- 10$):
- Estimated at 10$,
- this was one of our headsets which we used.
- We are not certain of specifics.
-\end_layout
-
-\begin_layout Enumerate
-DSP Radio Module (1x,
- $16.99):
- using a Create Idea RDA5807M FM Stereo Receiver available on Amazon.
-\end_layout
-
-\begin_layout Enumerate
-Universal Remote (1x,
- provided by EEC 172)
-\end_layout
-
-\begin_layout Enumerate
-IR Receiver (1x,
- provided by EEC 172)
-\end_layout
-
-\begin_layout Enumerate
-CC3200 MCU (1x,
- provided by EEC 172)
-\end_layout
-
-\begin_layout Enumerate
-Adafruit SSD1351 OLED Display (1x,
- provided by EEC 172)
-\end_layout
-
-\begin_layout Enumerate
-3 resistors,
- 1 capacitor,
- jumper wires (Available from EEC 172 lab)
+Updated Bill of Materials
 \end_layout
 
 \begin_layout Standard
-Total costs come out to 
-\bar under
-$
-\bar default
-xx.
- 
+\begin_inset Float table
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Updated Bill of Materials
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="10" columns="4">
+<features borderColor="default" oddRowsColor="default" evenRowsColor="default" tabularvalignment="middle">
+<column alignment="center" valignment="top" color="default">
+<column alignment="center" valignment="top" color="default">
+<column alignment="center" valignment="top" color="default">
+<column alignment="center" valignment="top" color="default">
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Total Cost / Origin
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Individual Cost
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.5mm Plug Wired Headphones
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1 x $2.55 / Amazon
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$2.55
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Output Sound
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+FM Stereo Radio Module
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1 x $16.99 / Amazon
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$16.99
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+TEA5767 FM Stereo Chip + Antenna + Amplifier/Output
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ELEGOO Arduino Nano
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3x $15.99 / Amazon
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$5.33
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+FM Module - Launchpad Intermediate
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+AT&T Universal Remote
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00 / Lab
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+IR Receiver
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00 / Lab
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CC3200 Ti-Launchpad
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00 / Lab
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Adafruit SSD1351 OLED Display
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00 / Lab
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3 Resistors,
+ 1 Capacitor,
+ X Jumper wires
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00 / Lab
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Grand Total
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\color red
+$24.87
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_body
