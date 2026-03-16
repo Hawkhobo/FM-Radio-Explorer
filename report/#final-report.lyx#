@@ -9,8 +9,6 @@
 % for subfigures/subtables
 \usepackage[caption=false,font=footnotesize]{subfig}
 
-\markboth{EEC 172 Final Report, WQ2026}{EEC 172 Final Report, WQ2026}
-
 % color for code
 \usepackage{xcolor}
 \definecolor{codegreen}{rgb}{0,0.6,0}
