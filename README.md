@@ -7,7 +7,7 @@ header:
   overlay_color: "#000"
   overlay_filter: "0.5"
   overlay_image: /assets/images/header-radio.jpg # Add a header image if you have one!
-excerpt: "An embedded systems prototype integrating the TI CC3200, Last.fm API, and an FM Stereo Radio Module."
+excerpt: "An embedded systems prototype integrating the TI CC3200, Last.fm API, and an FM Stereo Radio Module. The final project in EEC 172, WQ 2026 taught by Professor Ghiasi."
 toc: true
 toc_sticky: true
 ---
