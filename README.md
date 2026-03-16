@@ -159,6 +159,8 @@ it was expected this would be the most complicated component of the entire proje
 
 ### Synced Lyrics
 
+Unfortunately, the best candidate for an open-source, non-commerical web service providing lyrics for songs is LRClib. While excellent, it does not provide support for TLS v1.2 certificates, and strictly communicates over HTTPS, meaning that our API calls were simply incompatible. We ended up hard-coding the results of endpoints in our demonstration code (seen in DEMO/), and that worked pretty effectively for a prototype. We used a simple GP Timer to sync it with the progress bar and create a time distribution based on the time stamps. You can see the response from the API in our demo code.
+
 ### Radio Module Implementation
 
 #### RRD-102 with RDA5807M FM Module
