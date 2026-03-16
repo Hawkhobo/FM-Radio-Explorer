@@ -644,6 +644,8 @@ We had many challenges with our original radio module,
  and the other was to communicate to the Arduino using UART.
  Even thought they could not happen at the same time with out current model,
  they would reasonably be able to happen with the right FM module.
+ There was an additional issue with the Arduino UART signals continuing to also be for 5V,
+ but we put a voltage divider so the TI-Launchpad could receive the correct signals.
 \end_layout
 
 \begin_layout Section

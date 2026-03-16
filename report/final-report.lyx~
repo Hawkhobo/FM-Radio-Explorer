@@ -628,7 +628,22 @@ IR Receiver Interrupts and Remote Input
 \end_layout
 
 \begin_layout Subsection
-Headphones Jack
+Radio Module
+\end_layout
+
+\begin_layout Standard
+We had many challenges with our original radio module,
+ so we had to emergency purchase another module that had similar functionality.
+ The benefits of the new module is that it also came with the amplifier circuit and a headphone jack.
+ We learned over experimenting was that with the module constantly running at 5V,
+ there was no reasonable way for the I2C lines of the TI-Launchpad to communicate with the module.
+ We decided to implement a proof-of-concept instead.
+ There was already a setup designed using an Arduino and its 5V lines to command the module,
+ so we decided to have 2 separate systems,
+ where one was to communicate with the Screen + IR Receiver,
+ and the other was to communicate to the Arduino using UART.
+ Even thought they could not happen at the same time with out current model,
+ they would reasonably be able to happen with the right FM module.
 \end_layout
 
 \begin_layout Section
