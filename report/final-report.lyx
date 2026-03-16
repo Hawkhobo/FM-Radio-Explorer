@@ -798,6 +798,296 @@ oled_ui.c
 SimpleLink & Last.fm API
 \end_layout
 
+\begin_layout Standard
+The Last.fm API client module (
+\family typewriter
+lastfm.c
+\family default
+ / 
+\family typewriter
+lastfm.h
+\family default
+) is responsible for all network communication in the FM Radio Explorer.
+ When the user tunes to a station and the current artist and track title are known,
+ this module gets track metadata from the Last.fm public REST API and pushes the results into the OLED UI.
+ It also downloads and pre-processes the album cover JPEG so that the OLED UI module can decode and display it.
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+lastfm.c
+\family default
+ owns everything on the network side:
+ DNS resolution,
+ TCP socket management,
+ HTTP request construction and transmission,
+ JSON parsing,
+ and more.
+ 
+\family typewriter
+oled_ui.c
+\family default
+ owns everything on the pixel side:
+ JPEG decoding via 
+\family typewriter
+stb_image
+\family default
+,
+ aspect-ratio scaling,
+ and more.
+ The pipeline clearly transitions from network to pixel decoding & drawing.
+\end_layout
+
+\begin_layout Standard
+All API calls target ws.audioscrobbler.com on plain HTTP port 80.
+ JSON responses are typically two to eight kilobytes.
+ Album cover art is fetched from the Last.fm CDN (lastfm.freetls.fastly.net) over a TCP socket.
+ The HTTPS url stored in the API response is rewritten to HTTP to sidestep the our CC3200's TLS root-CA certificate limitations.
+\end_layout
+
+\begin_layout Subsubsection
+HTTP Layer
+\end_layout
+
+\begin_layout Standard
+All communication with the Last.fm API goes through a single internal function,
+ 
+\family typewriter
+http_get_plain()
+\family default
+.
+ This function handles the complete request-response cycle for one HTTP GET and is reused for every API call.
+ The SimpleLink sl_NetAppDnsGetHostByName() call is used to resolve the hostname to a 32-bit IP address.
+ If resolution fails,
+ LASTFM_ERR_DNS is returned immediately and no socket is created.
+ A standard TCP socket is created with sl_Socket().
+ A receive timeout of LASTFM_RECV_TIMEOUT_MS (8 seconds by default) is applied via sl_SetSockOpt() before the connection attempt.
+ The HTTP request is formatted as HTTP/1.0 with a Connection:
+ close header so the server closes the connection after transmitting the response The response is read into s_http_buf in a loop using sl_Recv().
+ The loop exits when sl_Recv() returns zero (connection closed by server,
+ the normal termination for HTTP/1.0),
+ when the receive timeout fires,
+ or when the buffer is full.
+ A partial receive after at least some data has arrived is treated as the complete response rather than an error,
+ allowing gracefully truncated responses to be parsed.
+ After the loop,
+ the buffer is null-terminated and the total byte count is returned.
+ A shared helper,
+ 
+\family typewriter
+http_skip_headers()
+\family default
+,
+ locates the end of the HTTP headers by scanning for the standard carriage-return-newline carriage-return-newline sequence.
+ It also extracts the numeric HTTP status code from the first response line.
+ The returned pointer addresses the first byte of the response body.
+ If the status code is 200,
+ we move on to our Last.fm query functions to actually extract the data.
+\end_layout
+
+\begin_layout Subsubsection
+JSON Parsing
+\end_layout
+
+\begin_layout Standard
+The Last.fm REST API returns JSON.
+ Our CC3200 has limited RAM and no standard C library JSON parser,
+ so 
+\family typewriter
+lastfm.c
+\family default
+ implements three lightweight extraction routines.
+ All operate directly on the raw response buffer.
+ 
+\family typewriter
+json_get_string
+\family default
+ searches the response text for the pattern "key":
+ and copies the value string that follows into an output buffer.
+ It handles the standard JSON string escape sequences,
+ converting whatever the CC3200 can interprety to their ASCII equivalent;
+ anything not interpretable is repalced with a question mark (the OLED is ASCII-only).
+ 
+\family typewriter
+json_get_name_array
+\family default
+ extracts the "name" field from each object element of a named JSON array.
+ It locates the array by key,
+ then walks through each object element iteratively.
+ The object is copied into a small buffer and 
+\family typewriter
+json_get_string
+\family default
+ is called on it to extract the name.
+ This is used for genre tags and similar artists,
+ where each array element is a simple object with a name and a URL.
+ 
+\family typewriter
+json_get_track_array
+\family default
+ is a variant of 
+\family typewriter
+json_get_name_array 
+\family default
+that handles track entries,
+ which contain both a track name and a nested artist object.
+ For each array element it extracts the top-level name field,
+ then locates the nested artist object by its key and extracts the artist name field from within it.
+\end_layout
+
+\begin_layout Subsubsection
+Text Cleaning
+\end_layout
+
+\begin_layout Standard
+Last.fm biography text is returned as HTML-decorated text.
+ Two helper functions clean this text before it is stored in the UI data structures.
+\end_layout
+
+\begin_layout Subsubsection
+Four API Calls
+\end_layout
+
+\begin_layout Standard
+Each query for a track and artist from the FM radio makes 4 API calls.
+\end_layout
+
+\begin_layout Subsubsection
+track.getInfo
+\end_layout
+
+\begin_layout Standard
+Fetches metadata for the current track and is the only source of the album-art URL.
+ The autocorrect=1 parameter is included so that minor spelling differences in artist or track names are silently corrected by Last.fm.
+ The corrected names are used for all subsequent API calls.
+ Genre tags are extracted from the 
+\family typewriter
+toptags.tag
+\family default
+ array and pushed to the Genre Tags view.
+ The album image URL is located within the album object's image array.
+ The module iterates through the image entries and prefers the "medium" size (64x64 pixels).
+ If the URL uses HTTPS or ends in .png,
+ it is rewritten to HTTP and .jpg respectively before being cached,
+ working around the CC3200's TLS certificate chain limitation.
+\end_layout
+
+\begin_layout Subsubsection
+artist.getInfo
+\end_layout
+
+\begin_layout Standard
+Fetches metadata for the corrected artist name.
+ The artist biography is extracted from the 
+\family typewriter
+bio.summary
+\family default
+ field,
+ specificlaly the shorter version.
+ Artist-level genre tags are also extracted from this response and overwrite the track-level tags set by the previous call,
+ since they are higher quality (in our experience).
+\end_layout
+
+\begin_layout Subsubsection
+artist.getSimilar
+\end_layout
+
+\begin_layout Standard
+Fetches a list of similar artists using the dedicated 
+\family typewriter
+artist.getSimilar
+\family default
+ endpoint.
+ This is a separate API call rather than using the similar-artists list embedded in the 
+\family typewriter
+artist.getInfo
+\family default
+ response because that embedded list is hard-capped at five entries by the API.
+ This can return up to 10 entries.
+ The list is stored in the Similar Artists view.
+\end_layout
+
+\begin_layout Subsubsection
+track.getSimilar / artist.getTopTracks
+\end_layout
+
+\begin_layout Standard
+This call attempts 
+\family typewriter
+track.getSimilar
+\family default
+ first.
+ As of 2025,
+ this endpoint frequently returns an empty list even for well-known tracks.
+ If fewer than two results are returned,
+ the call falls back automatically to 
+\family typewriter
+artist.getTopTracks
+\family default
+ for the same artist.
+ If both attempts return no data,
+ a placeholder entry is stored and the function still returns LASTFM_OK so that other views are not affected.
+\end_layout
+
+\begin_layout Subsection
+Album Cover Fetch
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+LastFM_RenderAlbumCover()
+\family default
+ is called by main.c after the user navigates to the Album Cover view,
+ provided 
+\family typewriter
+LastFM_AlbumArtAvailable()
+\family default
+ is true.
+ The function does not render pixels itself;
+ it just downloads the JPEG bytes and delivers them to oled_ui_render_album_jpeg().
+ The cached image URL in 
+\family typewriter
+s_img_url 
+\family default
+is split into hostname and path components by 
+\family typewriter
+parse_url()
+\family default
+.
+ A TCP socket is opened to the image host using the same DNS-resolve,
+ create,
+ set-timeout,
+ and connect sequence used for API calls.
+ The full HTTP response (headers plus image body) is received into the dedicated 20 KB s_jpeg_buf buffer.
+ The socket is closed immediately after the receive loop exits.
+ If chunked encoding is detected,
+ the body is decoded in-place:
+ the module walks a read cursor through the chunk size headers and chunk data blocks,
+ copying each chunk's data to a write cursor that lags behind.
+ The final decoded byte count replaces the raw received length.
+ The first bytes of the decoded output are logged over UART to confirm that 0xFF 0xD8 is present.
+ After decoding,
+ we have the module verify the JPEG SOI marker (0xFF 0xD8) one final time.
+ If it is absent,
+ LASTFM_ERR_JPEG is returned.
+ If present,
+ 
+\family typewriter
+oled_ui_render_album_jpeg(s_jpeg_buf,
+ img_len)
+\family default
+ is called,
+ passing the pointer and byte count.
+ From this point the OLED UI module assumes decode and draw process,
+ using 
+\family typewriter
+stb_image 
+\family default
+to decompose the JPEG into pixels and the bilinear scaler to fit them onto the content area.
+\end_layout
+
 \begin_layout Subsection
 IR Receiver Interrupts and Remote Input
 \end_layout
