@@ -240,7 +240,7 @@ State Diagram
 \begin_layout Plain Layout
 \begin_inset Graphics
 	filename state_diagram.png
-	scale 30
+	scale 20
 
 \end_inset
 
@@ -1279,8 +1279,55 @@ While there were many challenges,
 JPEG Decompression Library and Image Display
 \end_layout
 
+\begin_layout Standard
+We had a very difficult time getting the JPEG image to work;
+ it was expected this would be the most complicated component of the entire project,
+ and indeed it was.
+ Issues mainly stemmed from the fact that Last.fm's fastly CDN for album covers only server progressive JPEGs,
+ and not baseline JPEGs.
+ This proved difficult,
+ since most CC3200-compatible JPEG decompression/decoding libraries only support baseline.
+ Luckily,
+ there was 
+\family typewriter
+stb_image
+\family default
+,
+ but we had to work through two other libraries (
+\family typewriter
+TJpegDec 
+\family default
+and 
+\family typewriter
+JPEGDEC
+\family default
+,
+ refactoring the driver code of one entirely!) before we settled on this final library.
+ After memory pooling issues (during this project,
+ we had RAM issues with the microcontroller around 50 or so times),
+ we got the image to display!
+\end_layout
+
 \begin_layout Subsection
 Synced Lyrics
+\end_layout
+
+\begin_layout Standard
+Unfortunately,
+ the best candidate for an open-source,
+ non-commerical web service providing lyrics for songs is LRClib.
+ While excellent,
+ it does not provide support for TLS v1.2 certificates,
+ and strictly communicates over HTTPS,
+ meaning that our API calls were simply incompatible.
+ We ended up hard-coding the results of endpoints in our demonstration code (seen in 
+\family typewriter
+DEMO/
+\family default
+),
+ and that worked pretty effectively for a prototype.
+ We used a simple GP Timer to sync it with the progress bar and create a time distribution based on the time stamps.
+ You can see the response from the API in our demo code.
 \end_layout
 
 \begin_layout Subsection
@@ -1436,8 +1483,8 @@ Bill of Materials
 
 \begin_layout Standard
 \begin_inset Float table
-placement document
-alignment document
+placement H
+alignment center
 wide false
 sideways false
 status open
