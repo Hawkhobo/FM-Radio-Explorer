@@ -1,0 +1,1913 @@
+#LyX 2.5 created this file. For more info see https://www.lyx.org/
+\lyxformat 643
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass IEEEtran
+\begin_preamble
+% for subfigures/subtables
+\usepackage[caption=false,font=footnotesize]{subfig}
+
+\markboth{EEC 172 Final Report, WQ2026}{EEC 172 Final Report, WQ2026}
+\raggedbottom
+
+% color for code
+\usepackage{xcolor}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\end_preamble
+\options journal
+\use_default_options false
+\maintain_unincluded_children no
+\language english
+\language_package none
+\inputencoding utf8
+\fontencoding auto
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command bibtex
+\index_command default
+\float_placement tbh
+\float_alignment class
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_title "Your Title"
+\pdf_author "Your Name"
+\pdf_bookmarks true
+\pdf_bookmarksnumbered true
+\pdf_bookmarksopen true
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder true
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle false
+\pdf_quoted_options "pdfpagelayout=OneColumn, pdfnewwindow=true, pdfstartview=XYZ, plainpages=false"
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification default
+\crossref_package prettyref
+\use_formatted_ref 0
+\use_minted 0
+\use_lineno 0
+\backgroundcolor none
+\fontcolor none
+\notefontcolor lightgray
+\boxbgcolor red
+\table_border_color default
+\table_odd_row_color default
+\table_even_row_color default
+\table_alt_row_colors_start 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 2
+\papersides 1
+\paperpagestyle default
+\tablestyle default
+\tracking_changes false
+\output_changes false
+\change_bars false
+\postpone_fragile_content false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
+\docbook_mathml_version 0
+\end_header
+
+\begin_body
+
+\begin_layout Title
+The FM Radio Explorer
+\end_layout
+
+\begin_layout Author
+Jacob Feenstra and Chun-Ho Chen
+\end_layout
+
+\begin_layout Page headings
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+EEC 172 Final Report,
+ WQ2026
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Description
+\end_layout
+
+\begin_layout Standard
+The FM Radio Explorer has changed due to time & hardware constraints from it's initial proposal,
+ but it still offers an exploratory music listening experience.
+ In its current stage,
+ it is a prototype with real capability to become a production-value system.
+ Last.fm's public-facing API is still used to query metadata for a particular song,
+ and the radio module is capable of tuning into FM radio signals and performing playback.
+ Unfortunately,
+ working with the RDA5870M radio module model proved more difficult than we anticipated,
+ and we were not able to successfully solder it to the rest of the system.
+ The replacement radio module we opted for does not support the Radio Data System protocol (RDS),
+ which is crucial for being able to display information for the currently playing song.
+ 
+\end_layout
+
+\begin_layout Standard
+The current prototype is as follows:
+ Last.fm offers a wide variety of metadata and points of musical exploration,
+ a subset of which is displayed for a song of our choice,
+ by querying the API endpoints with the track and artist name.
+ The S10-S3 Univeral Remote and IR Receiver is configured for numerical & punctuation input,
+ and writes to the radio module and plays a selected FM broadband (for example,
+ 90.3 would correlate to 90.3 FM).
+ The same remote will be used to switch between different OLED Display views,
+ each of which displays different output from the Last.fm API (to be discussed in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Design"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+).
+ An antenna boosts signal gain,
+ and a cheap 3.5 mm auxiliary headset can plug directly into the headphone jack of the radio module.
+ The API developed for the OLED UI,
+ paired with the IR Receiver code,
+ enables the user to switch between different FM radios seamlessly.
+ Note all of this is orchestrated with our Texas Instrument's CC3200 LaunchPad.
+\end_layout
+
+\begin_layout Section
+Design 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Design"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Functional Specification 
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Functional-Specification"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+alignment center
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+State Diagram
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename state_diagram.png
+	scale 20
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As indicated above,
+ the functional specification mainly revolves around two main categories:
+ the use of the universal remote and the OLED display.
+ All of the other technical details are hardware-specific (system architecture),
+ or abstracted away from the user.
+ You may notice in the diagrams that some functional/system specifications have been removed when compared against the proposal's specifications.
+ This mostly stems from complications with dealing with a non-RDS compliant radio module,
+ and we had to sacrifice some features (namely volume configuration,
+ mute and unmute,
+ and callsign multi-tap).
+ We also added some features,
+ most notably OLED view scrolling.
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Universal Remote
+\bar default
+:
+ A set of buttons are configured for the user to control the FM playback,
+ as well as the current display on the OLED.
+ The full input includes:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\bar under
+Numerical buttons:
+
+\bar default
+ Use the numerical buttons to specify the FM radio frequency.
+ Buttons 0-9 map to these numbers.
+ The puncutation is reserved for the ENTER button.
+ For instance,
+ to tune into 90.3 FM (our local college radio!),
+ you would type in 
+\begin_inset Quotes eld
+\end_inset
+
+90.3
+\begin_inset Quotes erd
+\end_inset
+
+,
+ tapping the 0 button twice for the period.
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Enter button
+\bar default
+:
+ Pressing the OK button sends the currently typed input (as described in a) to be queried against the radio module.
+ If it matches with an FM broadband,
+ that broadband will play!
+ Any erroneous or unrecognized input prompts the user to try again with a red flash.
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Delete button:
+
+\bar default
+ Delete the last character entered while input is pending.
+ Note this is a nice to have,
+ and if our Delete button is not working (something which occurred in Lab 3),
+ we will simply opt for the user to recycle the input by pressing enter.
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Last button
+\bar default
+:
+ Playback the last FM radio signal visited.
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Left Arrow
+\bar default
+:
+ Navigate to an OLED view to the left.
+ Each view will be accessible from a 
+\begin_inset Quotes eld
+\end_inset
+
+banner menu
+\begin_inset Quotes erd
+\end_inset
+
+ at the top of the OLED,
+ not dissimilar to traditional graphical interfaces in software.
+ Clicking the left arrow will 
+\begin_inset Quotes eld
+\end_inset
+
+switch
+\begin_inset Quotes erd
+\end_inset
+
+ to another view,
+ which will refresh the entire OLED display and highlight the relevant entry on the banner.
+ If at the end of the banner,
+ left-clicking cycles to the rightmost entry in the banner.
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Right arrow:
+
+\bar default
+ Similar functionality to the left arrow,
+ but for the entry to the right of the current entry.
+ If at the rightmost entry in the banner,
+ right-clicking cycles to the leftmost entry in the banner.
+\end_layout
+
+\begin_layout Enumerate
+
+\uuline on
+Up arrow
+\uuline default
+:
+ Scroll up 3 lines in the OLED View window.
+ Protects against scrolling above the boundaries.
+\end_layout
+
+\begin_layout Enumerate
+
+\uuline on
+Down arrow
+\uuline default
+:
+ Scroll down 3 lines in the OLED View window.
+ Protects against scrolling past rendered content.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+
+\bar under
+OLED Display
+\bar default
+:
+ What is presented on the OLED display,
+ and navigable by the left and right arrows on the remote.
+ Since we did not have RDS support,
+ for this prototype the relevant information is associated to a hardcoded track included in our backend.
+ As new FM signals get typed,
+ it cycles between 15 different tracks.
+ For each track,
+ live API calls are made each time which update the OLED Display accordingly;
+ only the source of input (hardcoded versus RDS) is what has changed.
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\bar under
+Radio view
+\bar default
+:
+ Shows the current FM radio playing,
+ current song playing,
+ the artist,
+ and track progression.
+ The progression bar is synced to the scrolling in the song lyrics view (see part g).
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Album cover view:
+
+\bar default
+ Shows a 118x118 JPEG image of the album cover of the song currently playing,
+ smoothed with bilinear interpolation.
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Similar artists view:
+
+\bar default
+ Shows a list of similar artists (compared against the artist currently playing).
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Artist Biography
+\bar default
+:
+ Shows biography of the artist currently playing
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Genre tags
+\bar default
+:
+ Indicates genres of the current song playing.
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Similar tracks
+\bar default
+:
+ Shows songs similar to the song currently playing.
+ Also includes the artist for the song.
+\end_layout
+
+\begin_layout Enumerate
+
+\bar under
+Song lyrics
+\bar default
+:
+ Uses a simpler system timer logic to support synced lyrics,
+ pulling from the timestamps contained in the API endpoint output of the LRClib open-source lyrics database.
+ The specifics of this will be discussed more in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:OLED-Display-API"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+
+\uuline on
+Scrolling indicators
+\uuline default
+:
+ Small magenta indicators on each view illustrate if there is more content above or below the current view.
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+System Architecture
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+alignment center
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Architectural Diagram
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename system_implementation.png
+	scale 30
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using a Digital Signal Processing (DSP) Radio Module with an antenna,
+ we reliably pick up on FM radiowaves in the greater Sacramento area.
+ The DSP uses I2C to send carrier information to the microcontroller.
+ Since the model does not support RDS,
+ The radio playback and OLED display content are asychronous of each other,
+ but this prototype illustrates that it would take minimal work to get them synced up with a supporting module.
+\end_layout
+
+\begin_layout Standard
+The DSP also manages an analog path to the audio output.
+ For the sake of prototype simplicity,
+ we plug a headset into the audio output.
+ Volume and gain would be managed at this point in the analog path for a final,
+ production radio explorer.
+ The DSP will also need two 4.7 kiloOhm resistors on it's I2C lines to ensure reliable response,
+ for all aspects of the communication protocol (including audio playback).
+\end_layout
+
+\begin_layout Standard
+The hardcoded demo code is inputted to the Last.fm API.
+ HTTP GET responses fetch relevant song & artist information from the API endpoints.
+ Each song entry has specially prepared synced lyrics to demonstrate our prototype.
+ A final production-quality system would likely spend the fee to use the Musixmatch API,
+ but for now,
+ the hard-coded LRClib outputs provide a sufficient demonstration of how the synced lyrics work.
+\end_layout
+
+\begin_layout Standard
+The Universal Remote and IR Receiver components are identical to Lab 3,
+ with some additional inputs,
+ seen in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Functional-Specification"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+.
+ With these specifications,
+ we can control the views on the OLED display,
+ which will be populated by GET responses from the Last.fm API.
+\end_layout
+
+\begin_layout Section
+Implementation 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Implementation"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Implementation details are explained at a high-level,
+ and forgoes specific C programming language details.
+ It does delve into driver code details where applicable,
+ since this informs our design.
+\end_layout
+
+\begin_layout Subsection
+OLED Display API 
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:OLED-Display-API"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The OLED UI module (
+\family typewriter
+oled_ui.c
+\family default
+ / 
+\family typewriter
+oled_ui.h
+\family default
+) is the sole owner of the 128x128 SSD1351 OLED display surface.
+ Decisions for what is drawn,
+ where,
+ and in what color all live here.
+ The rest of the firmware (the radio driver,
+ the Last.fm client,
+ the IR remote handler,
+ and main.c itself) communicates with this module through it's API.
+ Only the OLED UI issues drawing commands to the Adafruit GFX layer directly.
+\end_layout
+
+\begin_layout Subsubsection
+The View System
+\end_layout
+
+\begin_layout Standard
+The module exposes seven named views,
+ each corresponding to a distinct data category fetched during operation.
+ Each view has a three-character banner abbreviation and its own internal data store.
+ Only one view is active at a time.
+ The active view value is held in a single module-level variable (an enum).
+ Navigation calls cycle this variable and reset the associated scroll offset to zero,
+ but do not repaint the screen.
+ The render call that follows reads the current view ID and calls the appropriate internal draw function.
+ This means that switching to the next view (input-driven) is a 2-API call process.
+ Each view has an associated API endpoint to render this view,
+ which are doucmented in 
+\family typewriter
+oled_ui.h
+\family default
+.
+ 
+\end_layout
+
+\begin_layout Standard
+There is a separation between data updates and rendering.
+ Every update function writes new values into it's data store.
+ None of them touch the OLED hardware.
+ The single oled_ui_render() call is the only place where data is consumed and pixels are produced (OLED hardware is called here).
+ We leverage this to call multiple update functions in sequence before committing a single visual frame to the display.
+\end_layout
+
+\begin_layout Subsubsection
+Text Engine
+\end_layout
+
+\begin_layout Standard
+All drawing is built on top of the Adafruit GFX methods (fillRect,
+ drawPixel,
+ drawChar,
+ drawFastHLine,
+ drawFastVLine).
+ The Adafruit 5x7 bitmap font at size 1 IS USED,
+ giving each character a 6x8 pixel region (5 pixels wide plus a 1-pixel gap) and each text row a 9-pixel height (8 pixels tall plus a 1-pixel gap).
+ Text views (biography,
+ lyrics,
+ etc) are rendered in the folllowing way:
+ on a render call,
+ the engine first counts the total number of wrapped lines the stored text produces.
+ It then renders only the subset of lines that fall within the visible window defined by the current scroll offset.
+ Wrapping respects hard newlines in the source string and falls back to a soft break at the last space before the column limit if a word would overflow the line.
+ The scroll position is clamped during this pass so that attempting to scroll down the last line of content is always safe.
+ When a view's content extends above or below the display window,
+ a small magenta indicator dot is painted at the top-right or bottom-right corner of the screen to indicate that more content exists in that direction.
+\end_layout
+
+\begin_layout Subsubsection
+Album Cover Rendering
+\end_layout
+
+\begin_layout Standard
+The album cover requires two modules working in sequence.
+ The Last.fm client (
+\family typewriter
+Last.fm.c
+\family default
+) handles the network side:
+ it downloads the JPEG from the Last.f CDN,
+ decodes the HTTP response to extract the raw image bytes,
+ and passes a pointer to those bytes along with their length to 
+\family typewriter
+oled_ui_render_album_jpeg()
+\family default
+.
+ From that point,
+ everything is the OLED UI module's responsibility.
+\end_layout
+
+\begin_layout Standard
+The raw bytes are handed to 
+\family typewriter
+stb_image
+\family default
+,
+ which decodes them into a flat array of 24-bit RGB pixels.
+ Then,
+ it determines computes scale parameters that fit the decoded image into the content area while preserving the original aspect ratio.
+ If the image is wider than it is tall,
+ the width is constrained to 128 pixels and the height scales proportionally;
+ if it is taller,
+ the height is constrained to 116 pixels.
+ Any remaining border is left black.
+ The 
+\family typewriter
+stb_image
+\family default
+ decoding is the most complicated pipeline anywhere in our entire codebase,
+ and consists of approximately 8,000 lines of code which preprocesses the raw JPEG for OLED display use.
+ This library is taken entirely from 
+\begin_inset CommandInset href
+LatexCommand href
+name "Sean T. Barrett's public-domain C/C++ libraries"
+target "https://github.com/nothings/stb"
+literal "false"
+
+\end_inset
+
+.
+ Specifically 
+\family typewriter
+stb_image.h
+\family default
+.
+ We prepared a source file to use the main header file,
+ and that is virtually all the integration that was needed.
+\end_layout
+
+\begin_layout Standard
+The scaled image is written to the OLED using bilinear interpolation with a tunable sharpness.
+ This helps to balance blurriness at small display sizes without introducing the pixel-grid artifacts of pure nearest-neighbour scaling (a pretty ugly grid-like pattern).
+ All of the pixels are passed through this filter before being drawn to the OLED.
+\end_layout
+
+\begin_layout Standard
+Because the CC3200 has limited RAM,
+ 
+\family typewriter
+stb_image
+\family default
+ is configured to use a static pool allocator rather than the heap.
+ The pool is reset before every decode call and again after the draw has completed,
+ keeping the allocation self-contained to the given cycle.
+\end_layout
+
+\begin_layout Subsubsection
+Color Scheme
+\end_layout
+
+\begin_layout Standard
+All colour values are in a single block of named aliases near the top of 
+\family typewriter
+oled_ui.c
+\family default
+.
+ Changing the visual theme requires editing only this block;
+ there are no other color literals in the code.
+\end_layout
+
+\begin_layout Subsection
+SimpleLink & Last.fm API
+\end_layout
+
+\begin_layout Standard
+The Last.fm API client module (
+\family typewriter
+lastfm.c
+\family default
+ / 
+\family typewriter
+lastfm.h
+\family default
+) is responsible for all network communication in the FM Radio Explorer.
+ When the user tunes to a station and the current artist and track title are known,
+ this module gets track metadata from the Last.fm public REST API and pushes the results into the OLED UI.
+ It also downloads and pre-processes the album cover JPEG so that the OLED UI module can decode and display it.
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+lastfm.c
+\family default
+ owns everything on the network side:
+ DNS resolution,
+ TCP socket management,
+ HTTP request construction and transmission,
+ JSON parsing,
+ and more.
+ 
+\family typewriter
+oled_ui.c
+\family default
+ owns everything on the pixel side:
+ JPEG decoding via 
+\family typewriter
+stb_image
+\family default
+,
+ aspect-ratio scaling,
+ and more.
+ The pipeline clearly transitions from network to pixel decoding & drawing.
+\end_layout
+
+\begin_layout Standard
+All API calls target ws.audioscrobbler.com on plain HTTP port 80.
+ JSON responses are typically two to eight kilobytes.
+ Album cover art is fetched from the Last.fm CDN (lastfm.freetls.fastly.net) over a TCP socket.
+ The HTTPS url stored in the API response is rewritten to HTTP to sidestep the our CC3200's TLS root-CA certificate limitations.
+\end_layout
+
+\begin_layout Subsubsection
+HTTP Layer
+\end_layout
+
+\begin_layout Standard
+All communication with the Last.fm API goes through a single internal function,
+ 
+\family typewriter
+http_get_plain()
+\family default
+.
+ This function handles the complete request-response cycle for one HTTP GET and is reused for every API call.
+ The SimpleLink sl_NetAppDnsGetHostByName() call is used to resolve the hostname to a 32-bit IP address.
+ If resolution fails,
+ LASTFM_ERR_DNS is returned immediately and no socket is created.
+ A standard TCP socket is created with sl_Socket().
+ A receive timeout of LASTFM_RECV_TIMEOUT_MS (8 seconds by default) is applied via sl_SetSockOpt() before the connection attempt.
+ The HTTP request is formatted as HTTP/1.0 with a Connection:
+ close header so the server closes the connection after transmitting the response The response is read into s_http_buf in a loop using sl_Recv().
+ The loop exits when sl_Recv() returns zero (connection closed by server,
+ the normal termination for HTTP/1.0),
+ when the receive timeout fires,
+ or when the buffer is full.
+ A partial receive after at least some data has arrived is treated as the complete response rather than an error,
+ allowing gracefully truncated responses to be parsed.
+ After the loop,
+ the buffer is null-terminated and the total byte count is returned.
+ A shared helper,
+ 
+\family typewriter
+http_skip_headers()
+\family default
+,
+ locates the end of the HTTP headers by scanning for the standard carriage-return-newline carriage-return-newline sequence.
+ It also extracts the numeric HTTP status code from the first response line.
+ The returned pointer addresses the first byte of the response body.
+ If the status code is 200,
+ we move on to our Last.fm query functions to actually extract the data.
+\end_layout
+
+\begin_layout Subsubsection
+JSON Parsing
+\end_layout
+
+\begin_layout Standard
+The Last.fm REST API returns JSON.
+ Our CC3200 has limited RAM and no standard C library JSON parser,
+ so 
+\family typewriter
+lastfm.c
+\family default
+ implements three lightweight extraction routines.
+ All operate directly on the raw response buffer.
+ 
+\family typewriter
+json_get_string
+\family default
+ searches the response text for the pattern "key":
+ and copies the value string that follows into an output buffer.
+ It handles the standard JSON string escape sequences,
+ converting whatever the CC3200 can interprety to their ASCII equivalent;
+ anything not interpretable is repalced with a question mark (the OLED is ASCII-only).
+ 
+\family typewriter
+json_get_name_array
+\family default
+ extracts the "name" field from each object element of a named JSON array.
+ It locates the array by key,
+ then walks through each object element iteratively.
+ The object is copied into a small buffer and 
+\family typewriter
+json_get_string
+\family default
+ is called on it to extract the name.
+ This is used for genre tags and similar artists,
+ where each array element is a simple object with a name and a URL.
+ 
+\family typewriter
+json_get_track_array
+\family default
+ is a variant of 
+\family typewriter
+json_get_name_array 
+\family default
+that handles track entries,
+ which contain both a track name and a nested artist object.
+ For each array element it extracts the top-level name field,
+ then locates the nested artist object by its key and extracts the artist name field from within it.
+\end_layout
+
+\begin_layout Subsubsection
+Text Cleaning
+\end_layout
+
+\begin_layout Standard
+Last.fm biography text is returned as HTML-decorated text.
+ Two helper functions clean this text before it is stored in the UI data structures.
+\end_layout
+
+\begin_layout Subsubsection
+Four API Calls
+\end_layout
+
+\begin_layout Standard
+Each query for a track and artist from the FM radio makes 4 API calls.
+\end_layout
+
+\begin_layout Subsubsection
+track.getInfo
+\end_layout
+
+\begin_layout Standard
+Fetches metadata for the current track and is the only source of the album-art URL.
+ The autocorrect=1 parameter is included so that minor spelling differences in artist or track names are silently corrected by Last.fm.
+ The corrected names are used for all subsequent API calls.
+ Genre tags are extracted from the 
+\family typewriter
+toptags.tag
+\family default
+ array and pushed to the Genre Tags view.
+ The album image URL is located within the album object's image array.
+ The module iterates through the image entries and prefers the "medium" size (64x64 pixels).
+ If the URL uses HTTPS or ends in .png,
+ it is rewritten to HTTP and .jpg respectively before being cached,
+ working around the CC3200's TLS certificate chain limitation.
+\end_layout
+
+\begin_layout Subsubsection
+artist.getInfo
+\end_layout
+
+\begin_layout Standard
+Fetches metadata for the corrected artist name.
+ The artist biography is extracted from the 
+\family typewriter
+bio.summary
+\family default
+ field,
+ specificlaly the shorter version.
+ Artist-level genre tags are also extracted from this response and overwrite the track-level tags set by the previous call,
+ since they are higher quality (in our experience).
+\end_layout
+
+\begin_layout Subsubsection
+artist.getSimilar
+\end_layout
+
+\begin_layout Standard
+Fetches a list of similar artists using the dedicated 
+\family typewriter
+artist.getSimilar
+\family default
+ endpoint.
+ This is a separate API call rather than using the similar-artists list embedded in the 
+\family typewriter
+artist.getInfo
+\family default
+ response because that embedded list is hard-capped at five entries by the API.
+ This can return up to 10 entries.
+ The list is stored in the Similar Artists view.
+\end_layout
+
+\begin_layout Subsubsection
+track.getSimilar / artist.getTopTracks
+\end_layout
+
+\begin_layout Standard
+This call attempts 
+\family typewriter
+track.getSimilar
+\family default
+ first.
+ As of 2025,
+ this endpoint frequently returns an empty list even for well-known tracks.
+ If fewer than two results are returned,
+ the call falls back automatically to 
+\family typewriter
+artist.getTopTracks
+\family default
+ for the same artist.
+ If both attempts return no data,
+ a placeholder entry is stored and the function still returns LASTFM_OK so that other views are not affected.
+\end_layout
+
+\begin_layout Subsection
+Album Cover Fetch
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+LastFM_RenderAlbumCover()
+\family default
+ is called by main.c after the user navigates to the Album Cover view,
+ provided 
+\family typewriter
+LastFM_AlbumArtAvailable()
+\family default
+ is true.
+ The function does not render pixels itself;
+ it just downloads the JPEG bytes and delivers them to oled_ui_render_album_jpeg().
+ The cached image URL in 
+\family typewriter
+s_img_url 
+\family default
+is split into hostname and path components by 
+\family typewriter
+parse_url()
+\family default
+.
+ A TCP socket is opened to the image host using the same DNS-resolve,
+ create,
+ set-timeout,
+ and connect sequence used for API calls.
+ The full HTTP response (headers plus image body) is received into the dedicated 20 KB s_jpeg_buf buffer.
+ The socket is closed immediately after the receive loop exits.
+ If chunked encoding is detected,
+ the body is decoded in-place:
+ the module walks a read cursor through the chunk size headers and chunk data blocks,
+ copying each chunk's data to a write cursor that lags behind.
+ The final decoded byte count replaces the raw received length.
+ The first bytes of the decoded output are logged over UART to confirm that 0xFF 0xD8 is present.
+ After decoding,
+ we have the module verify the JPEG SOI marker (0xFF 0xD8) one final time.
+ If it is absent,
+ LASTFM_ERR_JPEG is returned.
+ If present,
+ 
+\family typewriter
+oled_ui_render_album_jpeg(s_jpeg_buf,
+ img_len)
+\family default
+ is called,
+ passing the pointer and byte count.
+ From this point the OLED UI module assumes decode and draw process,
+ using 
+\family typewriter
+stb_image 
+\family default
+to decompose the JPEG into pixels and the bilinear scaler to fit them onto the content area.
+\end_layout
+
+\begin_layout Subsection
+IR Receiver Interrupts and Remote Input
+\end_layout
+
+\begin_layout Subsection
+
+\family typewriter
+main()
+\family default
+ Event Loop
+\end_layout
+
+\begin_layout Subsubsection
+Initialization Sequence:
+\end_layout
+
+\begin_layout Standard
+First,
+ peripheral devices are brought up:
+ board vectors,
+ pin multiplexing,
+ Wi-Fi,
+ SPI,
+ and UART.
+ The Adafruit SSD1351 driver is initialized,
+ then the OLED UI module,
+ and lastly the TEA5767 radio module (default tuning at 90.3 MHz,
+ and the OLED UI is updated accordingly).
+ The IR receiver is then initialized,
+ and the Last.fm API client is fed it's API key.
+ 
+\family typewriter
+query_lastfm()
+\family default
+ get called to fetch metadata for the current track on 90.3 and populdate all data stores to reflect this current track.
+ Then it's all rendered to the OLED!
+\end_layout
+
+\begin_layout Subsubsection
+Query Last.fm helper
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+query_lastfm() 
+\family default
+function is the bridge between the Last.fm network client and the OLED UI module.
+ It calls the endpoint responsible for executing the Last.fm API calls and internally calls all the necessary 
+\family typewriter
+oled_ui*
+\family default
+ calls to update each view.
+ It also calls the data for the synced lyrics.
+\end_layout
+
+\begin_layout Subsubsection
+Tune and Update Helper
+\end_layout
+
+\begin_layout Standard
+When the user enters a new frequency,
+ 
+\family typewriter
+tune_and_update()
+\family default
+is called.
+ It first validates the frequency against the FM band limits.
+ If the frequency is out of range,
+ it provides visual error feedback,
+ then restores the display to its previous state.
+ If the frequency is valid,
+ the TEA5767 driver is instructed to retune,
+ the signal strength is read back,
+ 
+\family typewriter
+query_lastfm() 
+\family default
+is called to refresh all metadata views,
+ and the Radio view is updated and rendered with the new station label and signal level.
+\end_layout
+
+\begin_layout Subsubsection
+IR Remote Event Loop
+\end_layout
+
+\begin_layout Standard
+This is most of the code in 
+\family typewriter
+main.
+\family default
+c;
+ 
+\family typewriter
+main()
+\family default
+ enters an infinite polling loop.
+ On each iteration it checks whether the IR receiver has completed decoding a button press.
+ If so,
+ the raw RC5 code is decoded to a logical command and sent to a switch statement.
+ For digits 0-9 and the dot button,
+ each digit is appended to a frequency entry buffer.
+ The station field is immediately updated with a live preview string prefixed by > ,
+ and the Radio view is rendered to show the progress.
+ For SELECT (Enter),
+ if a frequency entry is in progress,
+ the buffer is parsed and 
+\family typewriter
+tune_and_update()
+\family default
+ is called with the result.
+ If the buffer cannot be parsed (it contains only a decimal point),
+ our error module is called and the display reverts to the last valid state.
+ If no entry is in progress,
+ SELECT simply forces the Radio view.
+ LEFT / RIGHT calls 
+\family typewriter
+oled_ui_navigate_left()
+\family default
+ or 
+\family typewriter
+oled_ui_navigate_right()
+\family default
+ followed by 
+\family typewriter
+oled_ui_render()
+\family default
+.
+ If the newly active view is the Album Cover view and artwork has already been fetched,
+ 
+\family typewriter
+LastFM_RenderAlbumCover()
+\family default
+ is called immediately to display the JPEG.
+ UP / DOWN calls 
+\family typewriter
+oled_ui_scroll_up()
+\family default
+ or 
+\family typewriter
+oled_ui_scroll_down()
+\family default
+ followed by 
+\family typewriter
+oled_ui_render()
+\family default
+.
+ MUTE toggles the mute state on the TEA5767 driver.
+ No OLED update is triggered.
+ Note this is stale code and didn't make it to our prototype,
+ but it does work with the TEA5767 driver code.
+ Lastly for LAST (Delete),
+ if a frequency entry is active,
+ it removes the last digit from the buffer and updates the preview.
+\end_layout
+
+\begin_layout Subsection
+Radio Module
+\end_layout
+
+\begin_layout Standard
+We had many challenges with our original radio module,
+ so we had to emergency purchase another module that had similar functionality.
+ The benefits of the new module is that it also came with the amplifier circuit and a headphone jack.
+ We learned over experimenting was that with the module constantly running at 5V,
+ there was no reasonable way for the I2C lines of the TI-Launchpad to communicate with the module.
+ We decided to implement a proof-of-concept instead.
+ There was already a setup designed using an Arduino and its 5V lines to command the module,
+ so we decided to have 2 separate systems,
+ where one was to communicate with the Screen + IR Receiver,
+ and the other was to communicate to the Arduino using UART.
+ Even thought they could not happen at the same time with out current model,
+ they would reasonably be able to happen with the right FM module.
+ There was an additional issue with the Arduino UART signals continuing to also be for 5V,
+ but we put a voltage divider so the TI-Launchpad could receive the correct signals.
+\end_layout
+
+\begin_layout Section
+Challenges
+\end_layout
+
+\begin_layout Standard
+While there were many challenges,
+ we focus on the most prominent ones,
+ which easily took up 90%+ of our time in attempting to solve (successfully or unsuccessully)
+\end_layout
+
+\begin_layout Subsection
+JPEG Decompression Library and Image Display
+\end_layout
+
+\begin_layout Standard
+We had a very difficult time getting the JPEG image to work;
+ it was expected this would be the most complicated component of the entire project,
+ and indeed it was.
+ Issues mainly stemmed from the fact that Last.fm's fastly CDN for album covers only server progressive JPEGs,
+ and not baseline JPEGs.
+ This proved difficult,
+ since most CC3200-compatible JPEG decompression/decoding libraries only support baseline.
+ Luckily,
+ there was 
+\family typewriter
+stb_image
+\family default
+,
+ but we had to work through two other libraries (
+\family typewriter
+TJpegDec 
+\family default
+and 
+\family typewriter
+JPEGDEC
+\family default
+,
+ refactoring the driver code of one entirely!) before we settled on this final library.
+ After memory pooling issues (during this project,
+ we had RAM issues with the microcontroller around 50 or so times),
+ we got the image to display!
+\end_layout
+
+\begin_layout Subsection
+Synced Lyrics
+\end_layout
+
+\begin_layout Standard
+Unfortunately,
+ the best candidate for an open-source,
+ non-commerical web service providing lyrics for songs is LRClib.
+ While excellent,
+ it does not provide support for TLS v1.2 certificates,
+ and strictly communicates over HTTPS,
+ meaning that our API calls were simply incompatible.
+ We ended up hard-coding the results of endpoints in our demonstration code (seen in 
+\family typewriter
+DEMO/
+\family default
+),
+ and that worked pretty effectively for a prototype.
+ We used a simple GP Timer to sync it with the progress bar and create a time distribution based on the time stamps.
+ You can see the response from the API in our demo code.
+\end_layout
+
+\begin_layout Subsection
+Radio Module Implementation
+\end_layout
+
+\begin_layout Subsubsection
+RRD-102 with RDA5807M FM Module
+\end_layout
+
+\begin_layout Standard
+With the original radio module we received,
+ there were immediately many issues that hurt our ability to gain any progress.
+ While not looking into it too much originally,
+ we realized that the module is a Surface Mount Device (SMD).
+ We originally purchased 4,
+ and the first 2 were burned because I tried connecting them to a protoboard alongside their side holes.
+ This would cause the copper pads to heat up too much,
+ and they were of such cheap quality that the pads themselves would lift up,
+ causing the device to be unusable.
+ With the 3rd module,
+ we tried connecting to the back pads directly since that would be easier to solder,
+ but unfortunately the issues still persisted.
+ I lost the 4th one,
+ so we had to resort to purchasing a different module.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment center
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Failed RRD-102 Modules
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename IMG_8942.jpg
+	scale 20
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename IMG_8943.jpg
+	scale 20
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+TEA5767 FM Module
+\end_layout
+
+\begin_layout Standard
+Since it came in a module package that was essentially plug and play,
+ it was a lot easier in theory to implement than the previous module.
+ However,
+ we came across separate issues immediately.
+ When I would try to communicate with the module,
+ it would receive garbage date back.
+ We tested it using an Arduino I had,
+ and the system worked.
+ We then went down a rabbit hole where:
+\end_layout
+
+\begin_layout Itemize
+Assumed pull-up resistors in the launchpad were inadequate,
+ tried to connect to the chip 3.3V and 5V
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Tried adding high value (~5k) resistors
+\end_layout
+
+\begin_layout Itemize
+Tried adding low value (~330) resistors
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+We realized that since it was an entire module rather than just a single chip required to be running on 5V.
+ The pull up resistors that were part of the modules were forcing the signals to that specification (~3.5V-4V),
+ which was above the needed <~3.3 required to communicate with the launchpad,
+ and nothing we additionally implement was going to fix that issue.
+ This forced us into the design change listed above.
+\end_layout
+
+\begin_layout Section
+Future Work
+\end_layout
+
+\begin_layout Subsection
+RDS-supported Radio Module
+\end_layout
+
+\begin_layout Standard
+With our current setup our FM Module does not have the capabilities to read off metadata coming from the FM signals coming in.
+ If we had however,
+ it would have a simple addition to add a couple lines of code to read that source data and connect it directly to the Lastfm API.
+ 
+\end_layout
+
+\begin_layout Subsection
+Potentiometer-controlled Audio Playback
+\end_layout
+
+\begin_layout Standard
+If we were allowed to use a similar radio chip to the one originally envisioned,
+ we had the parts to add an amplifier chip to it manually.
+ From that point onward,
+ we would have been able to adjust the volume by connecting a potentiometer to its output.
+ 
+\end_layout
+
+\begin_layout Subsection
+FM Session History
+\end_layout
+
+\begin_layout Standard
+If RAM concerns are not too heavy,
+ it would conceivably be trivial to allow for session history of previously visited FM signals,
+ and even past tracks that have been played (and allowing the ability to revisit their metadata).
+ This was originally a stretch goal and would be a cool initiative for next steps,
+ once RDS is working.
+\end_layout
+
+\begin_layout Section
+Bill of Materials
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement H
+alignment center
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Updated Bill of Materials
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="10" columns="4">
+<features borderColor="default" oddRowsColor="default" evenRowsColor="default" tabularvalignment="middle">
+<column alignment="center" valignment="top" color="default">
+<column alignment="center" valignment="top" color="default">
+<column alignment="center" valignment="top" color="default">
+<column alignment="center" valignment="top" color="default">
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Total Cost / Origin
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Individual Cost
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.5mm Plug Wired Headphones
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1 x $2.55 / Amazon
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$2.55
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Output Sound
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+FM Stereo Radio Module
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1 x $16.99 / Amazon
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$16.99
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+TEA5767 FM Stereo Chip + Antenna + Amplifier/Output
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ELEGOO Arduino Nano
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3x $15.99 / Amazon
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$5.33
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+FM Module - Launchpad Intermediate
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+AT&T Universal Remote
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00 / Lab
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+IR Receiver
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00 / Lab
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CC3200 Ti-Launchpad
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00 / Lab
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Adafruit SSD1351 OLED Display
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00 / Lab
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3 Resistors,
+ 1 Capacitor,
+ X Jumper wires
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00 / Lab
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+$0.00
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Grand Total
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\color red
+$24.87
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
