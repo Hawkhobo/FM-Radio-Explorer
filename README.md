@@ -2,6 +2,9 @@
 ## Jacob Feenstra & Chun-Ho Chen
 
 ~Note this webpage is subject to change~
+```
+testing code syntax highlighting
+```
 
 Historically, FM radio provided a dominating medium to
 organically explore music, curated by the on-air disc jockey.
