@@ -120,4 +120,71 @@ Because the CC3200 has limited RAM, stb_image is configured to use a static pool
 
 All colour values are in a single block of named aliases near the top of oled_ui.c. Changing the visual theme requires editing only this block; there are no other color literals in the code.
 
+### SimpleLink & Last.fm API
+
+### IR Receiver Interrupts and Remote Input
+
+### main() Event Loop
+
+#### Initialization Sequence:
+
+First, peripheral devices are brought up: board vectors, pin multiplexing, Wi-Fi, SPI, and UART. The Adafruit SSD1351 driver is initialized, then the OLED UI module, and lastly the TEA5767 radio module (default tuning at 90.3 MHz, and the OLED UI is updated accordingly). The IR receiver is then initialized, and the Last.fm API client is fed it's API key. query_lastfm() get called to fetch metadata for the current track on 90.3 and populdate all data stores to reflect this current track. Then it's all rendered to the OLED!
+
+#### Query Last.fm helper
+
+The query_lastfm() function is the bridge between the Last.fm network client and the OLED UI module. It calls the endpoint responsible for executing the Last.fm API calls and internally calls all the necessary oled_ui* calls to update each view. It also calls the data for the synced lyrics.
+
+#### Tune and Update Helper
+
+When the user enters a new frequency, tune_and_update()is called. It first validates the frequency against the FM band limits. If the frequency is out of range, it provides visual error feedback, then restores the display to its previous state. If the frequency is valid, the TEA5767 driver is instructed to retune, the signal strength is read back, query_lastfm() is called to refresh all metadata views, and the Radio view is updated and rendered with the new station label and signal level.
+
+#### IR Remote Event Loop
+
+This is most of the code in main.c; main() enters an infinite polling loop. On each iteration it checks whether the IR receiver has completed decoding a button press. If so, the raw RC5 code is decoded to a logical command and sent to a switch statement. For digits 0-9 and the dot button, each digit is appended to a frequency entry buffer. The station field is immediately updated with a live preview string prefixed by > , and the Radio view is rendered to show the progress. For SELECT (Enter), if a frequency entry is in progress, the buffer is parsed and tune_and_update() is called with the result. If the buffer cannot be parsed (it contains only a decimal point), our error module is called and the display reverts to the last valid state. If no entry is in progress, SELECT simply forces the Radio view. LEFT / RIGHT calls oled_ui_navigate_left() or oled_ui_navigate_right() followed by oled_ui_render(). If the newly active view is the Album Cover view and artwork has already been fetched, LastFM_RenderAlbumCover() is called immediately to display the JPEG. UP / DOWN calls oled_ui_scroll_up() or oled_ui_scroll_down() followed by oled_ui_render(). MUTE toggles the mute state on the TEA5767 driver. No OLED update is triggered. Note this is stale code and didn't make it to our prototype, but it does work with the TEA5767 driver code. Lastly for LAST (Delete), if a frequency entry is active, it removes the last digit from the buffer and updates the preview.
+
+## Radio Module
+
+We had many challenges with our original radio module, so we had to emergency purchase another module that had similar functionality. The benefits of the new module is that it also came with the amplifier circuit and a headphone jack. We learned over experimenting was that with the module constantly running at 5V, there was no reasonable way for the I2C lines of the TI-Launchpad to communicate with the module. We decided to implement a proof-of-concept instead. There was already a setup designed using an Arduino and its 5V lines to command the module, so we decided to have 2 separate systems, where one was to communicate with the Screen + IR Receiver, and the other was to communicate to the Arduino using UART. Even thought they could not happen at the same time with out current model, they would reasonably be able to happen with the right FM module. There was an additional issue with the Arduino UART signals continuing to also be for 5V, but we put a voltage divider so the TI-Launchpad could receive the correct signals.
+
+# Challenges
+
+While there were many challenges, we focus on the most prominent ones, which easily took up 90%+ of our time in attempting to solve (successfully or unsuccessully)
+
+### JPEG Decompression Library and Image Display
+
+### Synced Lyrics
+
+### Radio Module Implementation
+
+#### RRD-102 with RDA5807M FM Module
+
+With the original radio module we received, there were immediately many issues that hurt our ability to gain any progress. While not looking into it too much originally, we realized that the module is a Surface Mount Device (SMD). We originally purchased 4, and the first 2 were burned because I tried connecting them to a protoboard alongside their side holes. This would cause the copper pads to heat up too much, and they were of such cheap quality that the pads themselves would lift up, causing the device to be unusable. With the 3rd module, we tried connecting to the back pads directly since that would be easier to solder, but unfortunately the issues still persisted. I lost the 4th one, so we had to resort to purchasing a different module.
+
+
+
+#### TEA5767 FM Module
+
+Since it came in a module package that was essentially plug and play, it was a lot easier in theory to implement than the previous module. However, we came across separate issues immediately. When I would try to communicate with the module, it would receive garbage date back. We tested it using an Arduino I had, and the system worked. We then went down a rabbit hole where:
+
+• Assumed pull-up resistors in the launchpad were inadequate, tried to connect to the chip 3.3V and 5V
+
+– Tried adding high value (~5k) resistors
+
+– Tried adding low value (~330) resistors
+
+We realized that since it was an entire module rather than just a single chip required to be running on 5V. The pull up resistors that were part of the modules were forcing the signals to that specification (~3.5V-4V), which was above the needed <~3.3 required to communicate with the launchpad, and nothing we additionally implement was going to fix that issue. This forced us into the design change listed above.
+
+## Future Work
+
+### RDS-supported Radio Module
+
+With our current setup our FM Module does not have the capabilities to read off metadata coming from the FM signals coming in. If we had however, it would have a simple addition to add a couple lines of code to read that source data and connect it directly to the Lastfm API. 
+
+### Potentiometer-controlled Audio Playback
+
+If we were allowed to use a similar radio chip to the one originally envisioned, we had the parts to add an amplifier chip to it manually. From that point onward, we would have been able to adjust the volume by connecting a potentiometer to its output. 
+
+### FM Session History
+
+If RAM concerns are not too heavy, it would conceivably be trivial to allow for session history of previously visited FM signals, and even past tracks that have been played (and allowing the ability to revisit their metadata
 
